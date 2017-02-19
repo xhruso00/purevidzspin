@@ -1,0 +1,103 @@
+<html id="title-page"><head>
+    <title>Pure Vidz Spin-off</title>
+</head>
+<body>
+
+
+<div class="row">
+                <div id="video-container">
+                <video class="stream img-responsive" controls="">
+                <source src="http://ipfs2.purevidz.net:8080/ipfs/Qme9LKkPJQvbXajmryeZrDsE3oy5AU4qweoChogKfvUmXG" type="video/mp4">
+                </video>
+                </div>
+</div>
+
+    
+
+    <script type="text/javascript" src="/Content/v2/assets/js/scripts.minf56f.js?v11"></script>
+    <script type="text/javascript" src="/assets/js/purevidz.utility.js"></script>
+    <script type="text/javascript" src="/assets/js/purevidz.ajaxForm.js"></script>
+    <script type="text/javascript" src="/Content/v2/themes/mercury/assets/js/parallax.minf56f.js?v11"></script>
+
+    
+
+    <script type="text/javascript">
+        var IPFS_HASH = "Qme9LKkPJQvbXajmryeZrDsE3oy5AU4qweoChogKfvUmXG";
+        var GATEWAY_INDEX = -1;
+        var GATEWAYS =
+        [
+            'http://ipfs.purevidz.net:8080/ipfs/',
+            'http://ipfs2.purevidz.net:8080/ipfs/'
+        ];
+
+        $('html').prop('id', 'title-page');
+
+        $("i[data-ambiv]").click(function() {
+            var $this = $(this);
+            console.log($this.data('ambiv'));
+
+            $.post('/Dashboard/VideoAmbivalence',
+                {
+                    id: 1844,
+                    like: $this.data('ambiv')
+                },
+                function(data) {
+                    console.log(data);
+                    if (data.success) {
+                        var i_like = $("span[data-ambiv='true']");
+                        var i_dislike = $("span[data-ambiv='false']");
+                        i_like.html(data.data.Likes);
+                        i_dislike.html(data.data.Dislikes);
+                    }
+                });
+        });
+
+        function startedPlaying($video)
+        {
+            var video = $video[0];
+            return (video.currentTime > 0) || video.ended || video.paused;
+        }
+
+        $(document).ready( function () {
+
+            if (GATEWAY_INDEX == -1)
+                GATEWAY_INDEX = Math.floor(Math.random() * GATEWAYS.length);
+
+            var gateway = GATEWAYS[GATEWAY_INDEX];
+            var media = gateway + IPFS_HASH;
+
+            $("#video-container")
+                .html('<video class="stream img-responsive" controls><source src="' + media + '" type="video/mp4"></video>')
+                .show()
+                .find('video')[0]
+                .play();
+
+            setTimeout(function() {
+
+                // fail over
+                var $video = $(".streamContainer video");
+                if (!startedPlaying($video))
+                {
+                    var url = window.location.href;
+                    var ipfs = url.indexOf('ipfs=');
+                    if (ipfs > -1)
+                        url = url.substring(0, ipfs-1);
+                    
+                    if (url.indexOf('?') == -1)
+                        url = url + '?';
+                    else
+                        url = url + '&';
+
+                    url = url + 'ipfs=' + ((++gateway_index) % GATEWAYS.length);
+
+                    window.location.href = url;
+                }
+
+            }, 30 * 1000);
+        });
+    </script>
+
+
+
+
+</body></html>
